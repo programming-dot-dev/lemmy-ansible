@@ -6,19 +6,9 @@ x-logging: &default-logging
     max-size: "50m"
     max-file: "4"
 
-networks:
-  # communication to web and clients
-  lemmyexternalproxy:
-  # communication between lemmy services
-  lemmyinternal:
-    driver: bridge
-    internal: true
 services:
   proxy:
     image: nginx:1-alpine
-    networks:
-      - lemmyinternal
-      - lemmyexternalproxy
     ports:
       # actual and only port facing any connection from outside
       # Note, change the left number if port 1236 is already in use on your system
@@ -35,9 +25,6 @@ services:
   lemmy:
     image: {{ lemmy_docker_image }}
     hostname: lemmy
-    networks:
-      - lemmyinternal
-      - lemmyexternalproxy
     restart: always
     logging: *default-logging
     environment:
@@ -51,9 +38,6 @@ services:
 
   lemmy-ui:
     image: {{ lemmy_docker_ui_image }}
-    networks:
-      - lemmyinternal
-      - lemmyexternalproxy
     environment:
       - LEMMY_UI_LEMMY_INTERNAL_HOST=lemmy:8536
       - LEMMY_UI_LEMMY_EXTERNAL_HOST={{ domain }}
@@ -71,12 +55,9 @@ services:
     hostname: pictrs
     # we can set options to pictrs like this, here we set max. image size and forced format for conversion
     # entrypoint: /sbin/tini -- /usr/local/bin/pict-rs -p /mnt -m 4 --image-format webp
-    networks:
-      - lemmyinternal
-      - lemmyexternalproxy
     environment:
       - PICTRS_OPENTELEMETRY_URL=http://otel:4137
-      - PICTRS__API_KEY=API_KEY
+      - PICTRS__API_KEY={{ postgres_password }}
       - RUST_LOG=debug
       - RUST_BACKTRACE=full
       - PICTRS__MEDIA__VIDEO_CODEC=vp9
@@ -97,8 +78,6 @@ services:
   postgres:
     image: postgres:15-alpine
     hostname: postgres
-    networks:
-      - lemmyinternal
     environment:
       - POSTGRES_USER=lemmy
       - POSTGRES_PASSWORD={{ postgres_password }}
