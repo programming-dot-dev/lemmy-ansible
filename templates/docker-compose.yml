@@ -34,6 +34,13 @@ services:
     depends_on:
       - postgres
       - pictrs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8536"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    labels:
+      - "autoheal=true"
 
   lemmy-ui:
     image: {{ lemmy_docker_ui_image }}
@@ -93,3 +100,12 @@ services:
       - POSTFIX_myhostname={{ domain }}
     restart: "always"
     logging: *default-logging
+
+  autoheal:
+    restart: always
+    image: willfarrell/autoheal
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+      
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
