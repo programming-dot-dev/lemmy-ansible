@@ -26,10 +26,10 @@ services:
     image: {{ lemmy_docker_image }}
     hostname: lemmy
     restart: on-failure
-    healthcheck:
+    healthcheck: #Wget the api root every minute and restart if 
       test: ["CMD-SHELL", "wget -S -T 5 --spider -q  http://localhost:8536 || exit 1"]
-      interval: 1m30s
-      timeout: 10s
+      interval: 1m
+      timeout: 5s
       retries: 3
     logging: *default-logging
     environment:
