@@ -8,7 +8,7 @@ x-logging: &default-logging
 
 services:
   proxy:
-    image: nginx:1-alpine    
+    image: nginx:1-alpine
     ports:
       # actual and only port facing any connection from outside
       # Note, change the left number if port 1236 is already in use on your system
