@@ -8,7 +8,7 @@ x-logging: &default-logging
 
 services:
   proxy:
-    image: nginx:1-alpine
+    image: nginx:1-alpine    
     ports:
       # actual and only port facing any connection from outside
       # Note, change the left number if port 1236 is already in use on your system
@@ -25,7 +25,12 @@ services:
   lemmy:
     image: {{ lemmy_docker_image }}
     hostname: lemmy
-    restart: always
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget -S -T 5 --spider -q  http://localhost:8536 || exit 1"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
     logging: *default-logging
     environment:
       - RUST_LOG="warn"
@@ -34,13 +39,6 @@ services:
     depends_on:
       - postgres
       - pictrs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8536"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-    labels:
-      - "autoheal=true"
 
   lemmy-ui:
     image: {{ lemmy_docker_ui_image }}
@@ -100,12 +98,3 @@ services:
       - POSTFIX_myhostname={{ domain }}
     restart: "always"
     logging: *default-logging
-
-  autoheal:
-    restart: always
-    image: willfarrell/autoheal
-    environment:
-      - AUTOHEAL_CONTAINER_LABEL=autoheal
-      
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
