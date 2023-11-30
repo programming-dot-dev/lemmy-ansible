@@ -57,10 +57,13 @@
         name: nginx
         state: reloaded
   tasks:
+    - name: Check hostname resolution
+      ansible.builtin.ping:
+
     - name: Install aptitude
       ansible.builtin.apt:
         name: aptitude
-        state: present
+        state: latest
         update_cache: true
 
     - name: Install dependencies

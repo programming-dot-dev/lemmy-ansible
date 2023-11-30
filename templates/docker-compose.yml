@@ -46,8 +46,8 @@ services:
       interval: 1m
       timeout: 10s
       retries: 3
-    labels:
-      - "autoheal=true"
+    # labels:
+      # - "autoheal=true"
 
   lemmy-ui:
     image: {{ lemmy_docker_ui_image }}
@@ -67,7 +67,7 @@ services:
     logging: *default-logging
 
   pictrs:
-    image: docker.io/asonix/pictrs:0.4.0
+    image: docker.io/asonix/pictrs:0.4.5
     # this needs to match the pictrs url in lemmy.hjson
     hostname: pictrs
     # we can set options to pictrs like this, here we set max. image size and forced format for conversion
@@ -101,6 +101,8 @@ services:
 {% endfor %}
 {% endfor %}
 {% endif %}
+    ports:
+      - 5432:5432
     volumes:
       - ./volumes/postgres:/var/lib/postgresql/data:Z
       - ./customPostgresql.conf:/etc/postgresql.conf
@@ -121,11 +123,19 @@ services:
     restart: "always"
     logging: *default-logging
 
-  autoheal:
-    restart: always
-    image: willfarrell/autoheal
-    environment:
-      - AUTOHEAL_CONTAINER_LABEL=autoheal
+  # autoheal:
+  #   restart: always
+  #   image: willfarrell/autoheal
+  #   environment:
+  #     - AUTOHEAL_CONTAINER_LABEL=autoheal
 
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+
+
+  lemmy-modder:
+    image: ghcr.io/tgxn/lemmy-modder:latest
+    restart: unless-stopped
+    ports:
+      - 9696:80
+      
