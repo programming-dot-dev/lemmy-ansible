@@ -66,11 +66,11 @@
     postgres_password: "{{ lookup('password', 'inventory/host_vars/{{ domain }}/passwords/postgres chars=ascii_letters,digits') }}"
   tasks:
     - name: Ensure target system is >= EL9
-      ansible.builtin.fail:
-        msg: "This playbook requires Enterprise Linux 9 or greater"
-      when:
-        - ansible_distribution not in ['AlmaLinux', 'CentOS', 'RedHat', 'Rocky']
-        - ansible_distribution_major_version | int < 9
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution in ['AlmaLinux', 'CentOS', 'RedHat', 'Rocky']
+          - ansible_distribution_major_version | int >= 9
+        fail_msg: "This playbook requires Enterprise Linux 9 or greater"
       tags:
         - always
 
