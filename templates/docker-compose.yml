@@ -41,13 +41,6 @@ services:
     depends_on:
       - postgres
       - pictrs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8536"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-    # labels:
-      # - "autoheal=true"
 
   lemmy-ui:
     image: {{ lemmy_docker_ui_image }}
@@ -67,7 +60,7 @@ services:
     logging: *default-logging
 
   pictrs:
-    image: docker.io/asonix/pictrs:0.4.5
+    image: docker.io/asonix/pictrs:0.4.7
     # this needs to match the pictrs url in lemmy.hjson
     hostname: pictrs
     # we can set options to pictrs like this, here we set max. image size and forced format for conversion
@@ -79,6 +72,9 @@ services:
       - {{ key }}={{ value }}
 {% endfor %}
 {% endfor %}
+{% endif %}
+{% if pictrs_safety is defined and pictrs_safety|bool == true %}
+      - PICTRS__MEDIA__EXTERNAL_VALIDATION=http://{{ domain }}:14051/api/v1/scan/IPADDR
 {% endif %}
     user: 991:991
     volumes:
@@ -107,6 +103,7 @@ services:
       - ./volumes/postgres:/var/lib/postgresql/data:Z
       - ./customPostgresql.conf:/etc/postgresql.conf
     restart: always
+    command: postgres -c config_file=/etc/postgresql.conf
     shm_size: 1g
     logging: *default-logging
 
@@ -123,19 +120,23 @@ services:
     restart: "always"
     logging: *default-logging
 
-  # autoheal:
-  #   restart: always
-  #   image: willfarrell/autoheal
-  #   environment:
-  #     - AUTOHEAL_CONTAINER_LABEL=autoheal
-
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-
-
-  lemmy-modder:
-    image: ghcr.io/tgxn/lemmy-modder:latest
-    restart: unless-stopped
+{% if pictrs_safety is defined and pictrs_safety|bool == true %}
+  pictrs-safety:
+    image: ghcr.io/db0/pictrs-safety:v1.2.2
+    hostname: pictrs-safety
+    environment:
+{% if pictrs_safety_env_vars is defined and pictrs_safety_env_vars|length > 0 %}
+{% for item in pictrs_safety_env_vars %}
+{% for key, value in item.items() %}
+      - {{ key }}={{ value }}
+{% endfor %}
+{% endfor %}
+{% endif %}
     ports:
-      - 9696:80
-      
+      - "14051:14051"
+    user: 991:991
+    restart: always
+    logging: *default-logging
+    depends_on:
+      - pictrs
+{% endif %}
