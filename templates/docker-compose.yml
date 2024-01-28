@@ -48,6 +48,38 @@ services:
     restart: always
     logging: *default-logging
 
+  alexandrite:
+    image: ghcr.io/sheodox/alexandrite:0.8.12
+    ports:
+      - 3000:3000
+    environment:
+      - ALEXANDRITE_DEFAULT_INSTANCE={{ domain }}
+      - ALEXANDRITE_WELCOME_LEMMY_HELP=false
+      - ALEXANDRITE_WELCOME_INSTANCE_HELP=false
+      - ALEXANDRITE_FORCE_INSTANCE={{ domain }}
+
+  photon:
+    image: ghcr.io/xyphyn/photon:v1.26.0
+    ports:
+      - 3001:3000
+    environment:
+      - PUBLIC_INSTANCE_URL={{ domain }}
+
+  voyager:
+    image: ghcr.io/aeharding/voyager:1.37.4
+    ports:
+      - 3002:5314
+    environment:
+      - CUSTOM_LEMMY_SERVERS={{ domain }}
+    mlmym:
+      image: ghcr.io/rystar/mlmym:0.0.36
+      ports:
+        - 3003:8080
+      environment:
+        - LEMMY_DOMAIN={{ domain }}
+        - LISTING=local
+        - SORT=Active
+
   pictrs:
     image: asonix/pictrs:0.4.0
     # this needs to match the pictrs url in lemmy.hjson
