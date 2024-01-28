@@ -123,8 +123,12 @@
               dest: "/etc/nginx/sites-available/{{domain}}.conf"
               mode: "0644"
           vars:
-            lemmy_docker_image: "dessalines/lemmy:{{ lemmy_version | default( lookup('file', 'VERSION') )}}"
-            lemmy_docker_ui_image: "dessalines/lemmy-ui:{{ lemmy_ui_version | default(lemmy_version | default(lookup('file', 'VERSION')))}}"
+            lemmy_docker_image: "dessalines/lemmy:{{ lemmy_version | default( lookup('file', 'versions/VERSION') )}}"
+            lemmy_docker_ui_image: "dessalines/lemmy-ui:{{ lemmy_ui_version | default(lemmy_version | default(lookup('file', 'versions/VERSION')))}}"
+            photon_image: "ghcr.io/xyphyn/photon:{{ photon_version | default(lookup('file', 'versions/PHOTON_VERSION')) }}"
+            alexandrite_image: "ghcr.io/sheodox/alexandrite:{{ alexandrite_version | default(lookup('file', 'versions/ALEXANDRITE_VERSION')) }}"
+            mlmym_image: "ghcr.io/rystar/mlmym:{{ mlmym_version | default(lookup('file', 'versions/MLMYM_VERSION')) }}"
+            voyager_image: "ghcr.io/aeharding/voyager:{{ voyager_version | default(lookup('file', 'versions/VOYAGER_VERSION')) }}"
 
         - block:
             - name: gather stats on site enabled config
