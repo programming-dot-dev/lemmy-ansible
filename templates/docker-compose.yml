@@ -133,6 +133,8 @@ services:
     volumes:
       - ./volumes/postgres:/var/lib/postgresql/data:Z
       - ./customPostgresql.conf:/etc/postgresql.conf
+    ports:
+      - 5432:5432
     restart: always
     command: postgres -c config_file=/etc/postgresql.conf
     shm_size: 1g
