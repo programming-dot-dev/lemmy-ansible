@@ -24,7 +24,7 @@ services:
       - lemmy-ui
 
   lemmy:
-    image: { { lemmy_docker_image } }
+    image: {{ lemmy_docker_image }}
     hostname: lemmy
     restart: always
     logging: *default-logging
@@ -43,7 +43,7 @@ services:
       - pictrs
 
   lemmy-ui:
-    image: { { lemmy_docker_ui_image } }
+    image: {{ lemmy_docker_ui_image }}
     environment:
 {% if lemmyui_env_vars is defined and lemmyui_env_vars|length > 0 %}
 {% for item in lemmyui_env_vars %}
@@ -60,7 +60,7 @@ services:
     logging: *default-logging
 
   alexandrite:
-    image: {{ alexandrite_image}}
+    image: {{ alexandrite_image }}
     ports:
       - 3000:3000
     environment:
