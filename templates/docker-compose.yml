@@ -26,7 +26,12 @@ services:
   lemmy:
     image: {{ lemmy_docker_image }}
     hostname: lemmy
-    restart: always
+    restart: on-failure
+    healthcheck: #Wget the api root every minute and restart if timeout exceeds 5 seconds
+      test: ["CMD-SHELL", "wget -S -T 5 --spider -q  http://localhost:8536 || exit 1"] #NOTE the wget timeout is seperate from the heathcheck timeout
+      interval: 1m
+      timeout: 5s  #NOTE the heathcheck timeout is seperate from  the wget timeout
+      retries: 3
     logging: *default-logging
     environment:
 {% if lemmy_env_vars is defined and lemmy_env_vars|length > 0 %}
