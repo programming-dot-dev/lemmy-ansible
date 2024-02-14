@@ -31,6 +31,7 @@ postgres_env_vars:
 
 lemmy_env_vars:
   - RUST_LOG: warn
+  - MAX_DB_CONNECTIONS=20
 
 lemmyui_env_vars:
   - LEMMY_UI_LEMMY_INTERNAL_HOST: lemmy:8536

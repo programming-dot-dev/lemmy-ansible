@@ -8,7 +8,7 @@ x-logging: &default-logging
 
 services:
   proxy:
-    image: docker.io/library/nginx 
+    image: docker.io/library/nginx
     ports:
       # actual and only port facing any connection from outside
       # Note, change the left number if port 1236 is already in use on your system
@@ -130,6 +130,8 @@ services:
 {% endfor %}
 {% endfor %}
 {% endif %}
+    ports:
+      - 5432:5432
     volumes:
       - ./volumes/postgres:/var/lib/postgresql/data:Z
       - ./customPostgresql.conf:/etc/postgresql.conf

@@ -69,6 +69,9 @@
         name: nginx
         state: reloaded
   tasks:
+    - name: Check hostname resolution
+      ansible.builtin.ping:
+
     - name: Ensure target system is Debian or Ubuntu
       ansible.builtin.assert:
         that:
@@ -78,7 +81,7 @@
     - name: Install aptitude
       ansible.builtin.apt:
         name: aptitude
-        state: present
+        state: latest
         update_cache: true
 
     - name: Install dependencies
