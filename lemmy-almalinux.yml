@@ -96,6 +96,7 @@
         state: present
         name:
           - certbot
+          - cronie
           - curl
           - nginx
           - podman
@@ -129,6 +130,26 @@
       tags:
         - firewalld
 
+    - name: Adjust SELinux to allow HTTPD scripts and modules to connect to the network
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect
+        state: true
+        persistent: true
+      tags:
+        - nginx
+        - selinux
+
+    - name: Start and enable nginx.service
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: started
+        enabled: true
+      tags:
+        - certbot
+        - certbot_initial
+        - nginx
+        - ssl
+
     # TODO: certbot logic needs to be re-worked
     - name: Request initial letsencrypt certificate
       ansible.builtin.command: certbot certonly --nginx --agree-tos --cert-name '{{ domain }}' -d '{{ domain }}' -m '{{ letsencrypt_contact_email }}'
@@ -152,10 +173,14 @@
           owner: "root"
         - path: "{{ lemmy_base_dir }}/{{ domain }}/volumes/pictrs/"
           owner: "991" # Matches docker-compose UID in docker-compose.yml
+        - path: "/var/cache/lemmy/{{ domain }}/"
+          owner: "www-data"
+      tags:
+        - directories
 
     - name: Set lemmy_port fact
       ansible.builtin.set_fact:
-        lemmy_port: "{{ 32767 | random(start=1024) }}"
+        lemmy_port: "{{ lemmy_web_port | default(32767 | random(start=1024)) }}"
       tags:
         - always
 
